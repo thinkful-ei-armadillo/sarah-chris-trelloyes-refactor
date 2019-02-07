@@ -45,27 +45,39 @@ class App extends Component {
 
   handleDelete = (cardId, listId) => {
     
-    function omit (obj, keyToOmit) {
-      return Object.entries(obj).reduce(
-        (newObj, [key, value]) =>
-            key === keyToOmit ? newObj : {...newObj, [key]: value},
-        {}
-      );
-    }
-
-    const deleteObject = omit(this.state.allCards, cardId)
     const newList = this.state.lists.map(list => {
         if (list.id !== listId) return list;
         return Object.assign( {}, list, {cardIds: list.cardIds.filter(card => card !== cardId)})
       })
+      
+      this.setState({
+        lists: newList
+      })
+  }
+  
 
-    this.setState({
-      // allCards: deleteObject,
-      lists: newList
+  newRandomCard = () => {
+    const id = Math.random().toString(36).substring(2, 4)
+      + Math.random().toString(36).substring(2, 4);
+    return {
+      id,
+      title: `${id}`,
+      content: 'lorem ipsum',
+    }
+  } 
+  
+  addRandomButton = (listId) => {
+    const newCard = this.newRandomCard(); 
+    const addAllCards = Object.assign( {}, this.state.allCards, { [`${newCard.id}`]: newCard})
+    const addToList = this.state.lists.map(list =>{ 
+      if (list.id !== listId) return list;  
+      return Object.assign( {}, list, {cardIds: [...list.cardIds,newCard.id].sort()}) 
     })
-    console.log(cardId, listId)
-    console.log(this.state.allCards);
-    console.log(deleteObject);
+    
+    this.setState({
+      allCards: addAllCards,
+      lists: addToList, 
+    })
   }
 
   render() {
@@ -82,6 +94,7 @@ class App extends Component {
               cards={list.cardIds.map(id => this.state.allCards[id])}
               handleDelete= {this.handleDelete}
               id= {list.id}
+              addRandomButton= {this.addRandomButton}
               />))}          
         </div>
       </main>
